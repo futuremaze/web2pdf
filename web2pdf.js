@@ -4,19 +4,15 @@ function do_web2pdf(args) {
   (async () => {
     const fs = require('fs-extra');
     const puppeteer = require('puppeteer');
+    const devices = require('puppeteer/DeviceDescriptors');
     const browser = await puppeteer.launch({
       // headless: false,
       "ignoreHTTPSErrors": true
     });
     const page = await browser.newPage();
-    await page.setUserAgent(args.options.useragent);
-    await page.setViewport({
-      width: args.options.width,
-      height: args.options.height,
-      isMobile: true
-    });
-  
+
     try {
+      await page.emulate(devices[args.options.device]);
       await page.goto(args.targets[0], {waitUntil: "domcontentloaded"});
     } catch (e) {
       console.error(`${prog}:${e}`);
@@ -24,6 +20,10 @@ function do_web2pdf(args) {
     }
   
     var filename = (await page.title() + '.pdf').replace('/','／');
+    var width = await devices[args.options.device].viewport.width;
+    var height = await devices[args.options.device].viewport.height;
+    var deviceScaleFactor = await devices[args.options.device].viewport.deviceScaleFactor;
+
     try {
       fs.mkdirsSync(args.options.outputdir);
     } catch (e) {
@@ -33,8 +33,8 @@ function do_web2pdf(args) {
     await page.pdf({
       path: args.options.outputdir + '/' + filename,
       printBackground: true,
-      width: args.options.width,
-      height: args.options.height
+      width: width * deviceScaleFactor,
+      height: height * deviceScaleFactor
     });
     await browser.close();
   })();
@@ -42,6 +42,7 @@ function do_web2pdf(args) {
 
 function do_main() {
   var argv = require('argv');
+  var devices = require('puppeteer/DeviceDescriptors');
   
   argv.version('v1.0');
   argv.info(`${prog} [options] url`);
@@ -53,25 +54,11 @@ function do_main() {
       example: `'${prog} -o /path/to url' or '${prog} --outputdir /path/to url'`
   });
   argv.option({
-      name: 'width',
-      short: 'w',
-      type: 'int',
-      description: 'The width(px) of browser\'s viewport and PDF.',
-      example: `'${prog} -w 750 url' or '${prog} --width 750 url'`
-  });
-  argv.option({
-      name: 'height',
-      short: 'h',
-      type: 'int',
-      description: 'The height(px) of browser\'s viewport and PDF.',
-      example: `'${prog} -h 1334 url' or '${prog} --height 1334 url'`
-  });
-  argv.option({
-      name: 'useragent',
-      short: 'u',
+      name: 'device',
+      short: 'd',
       type: 'string',
-      description: 'User-Agent which is used to access url.',
-      example: `'${prog} -u "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1" url' or '${prog} --useragent "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1" url'`
+      description: 'Emulate device to access url.',
+      example: `'${prog} -d "iPhone 6" url' or '${prog} --device "iPhone 6" url'`
   });
 
   // check target and options.
@@ -82,9 +69,15 @@ function do_main() {
     process.exit(1);
   }
   args.options.outputdir = args.options.outputdir || "./";
-  args.options.width = args.options.width || 750;
-  args.options.height = args.options.height || 1334;
-  args.options.useragent = args.options.useragent || "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1";
+  args.options.device = args.options.device || "iPhone 6";
+  // if(devices.indexOf(args.options.device) == -1) {
+  //   console.error(`${prog}:Fatal:The specified device does not exist.`);
+  //   console.error(`  You can select from the devices described below.`);
+  //   for (var i=0; i<devices.length; i++) {
+  //     console.error(`    '${devices[i].name}'`);
+  //   }
+  //   process.exit(1);
+  // }
 
   do_web2pdf(args);
 }
