@@ -2,6 +2,7 @@ var prog = process.argv[1].replace(/^.*[\\\/]/, '');
 
 function do_web2pdf(args) {
   (async () => {
+    const fs = require('fs-extra');
     const puppeteer = require('puppeteer');
     const browser = await puppeteer.launch({
       // headless: false,
@@ -23,8 +24,14 @@ function do_web2pdf(args) {
     }
   
     var filename = (await page.title() + '.pdf').replace('/','／');
+    try {
+      fs.mkdirsSync(args.options.outputdir);
+    } catch (e) {
+      console.error(`${prog}:${e}`);
+      process.exit(1);
+    }
     await page.pdf({
-      path: args.options.dir + '/' + filename,
+      path: args.options.outputdir + '/' + filename,
       printBackground: true,
       width: args.options.width,
       height: args.options.height
@@ -39,11 +46,11 @@ function do_main() {
   argv.version('v1.0');
   argv.info(`${prog} [options] url`);
   argv.option({
-      name: 'dir',
-      short: 'd',
+      name: 'outputdir',
+      short: 'o',
       type: 'path',
       description: 'The destination directory to save your pdf.',
-      example: `'${prog} -d /path/to url' or '${prog} --dir /path/to url'`
+      example: `'${prog} -o /path/to url' or '${prog} --outputdir /path/to url'`
   });
   argv.option({
       name: 'width',
@@ -74,7 +81,7 @@ function do_main() {
     argv.help();
     process.exit(1);
   }
-  args.options.dir = args.options.dir || "./";
+  args.options.outputdir = args.options.outputdir || "./";
   args.options.width = args.options.width || 750;
   args.options.height = args.options.height || 1334;
   args.options.useragent = args.options.useragent || "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1";
