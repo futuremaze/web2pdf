@@ -1,6 +1,28 @@
 var prog = process.argv[1].replace(/^.*[\\\/]/, '');
 
+function check_args(args) {
+  if(args.targets.length != 1) {
+    console.error(`${prog}:Fatal:Url is not given.`);
+    argv.help();
+    process.exit(1);
+  }
+  args.options.outputdir = args.options.outputdir || "./";
+  args.options.device = args.options.device || "iPhone 6";
+  // if(devices.indexOf(args.options.device) == -1) {
+  //   console.error(`${prog}:Fatal:The specified device does not exist.`);
+  //   console.error(`  You can select from the devices described below.`);
+  //   for (var i=0; i<devices.length; i++) {
+  //     console.error(`    '${devices[i].name}'`);
+  //   }
+  //   process.exit(1);
+  // }
+
+  return(args);
+}
+
 function do_web2pdf(args) {
+  args = check_args(args);
+
   (async () => {
     const fs = require('fs-extra');
     const puppeteer = require('puppeteer');
@@ -19,6 +41,7 @@ function do_web2pdf(args) {
       process.exit(1);
     }
   
+    // output pdf.
     var filename = (await page.title() + '.pdf').replace('/','／');
     var width = await devices[args.options.device].viewport.width;
     var height = await devices[args.options.device].viewport.height;
@@ -61,24 +84,7 @@ function do_main() {
       example: `'${prog} -d "iPhone 6" url' or '${prog} --device "iPhone 6" url'`
   });
 
-  // check target and options.
   var args = argv.run();
-  if(args.targets.length != 1) {
-    console.error(`${prog}:Fatal:Url is not given.`);
-    argv.help();
-    process.exit(1);
-  }
-  args.options.outputdir = args.options.outputdir || "./";
-  args.options.device = args.options.device || "iPhone 6";
-  // if(devices.indexOf(args.options.device) == -1) {
-  //   console.error(`${prog}:Fatal:The specified device does not exist.`);
-  //   console.error(`  You can select from the devices described below.`);
-  //   for (var i=0; i<devices.length; i++) {
-  //     console.error(`    '${devices[i].name}'`);
-  //   }
-  //   process.exit(1);
-  // }
-
   do_web2pdf(args);
 }
 
