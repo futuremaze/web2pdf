@@ -53,4 +53,4 @@ COPY ./js/web2pdf.js /home/web2pdf/
 VOLUME ["/home/web2pdf/pdf"]
 EXPOSE 8080
 
-CMD node web2pdf.js -d ./pdf -s -p 8080
+CMD node web2pdf.js -o ./pdf -s -p 8080
