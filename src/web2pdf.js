@@ -11,7 +11,11 @@ function do_web2pdf(url, options={}, callback=undefined) {
     const puppeteer = require('puppeteer');
     const devices = require('puppeteer/DeviceDescriptors');
     const browser = await puppeteer.launch({
-      "ignoreHTTPSErrors": true
+      "ignoreHTTPSErrors": true,
+      "args": [
+        '--no-sandbox',
+        '--disable-setuid-sandbox'
+      ]
     });
     const page = await browser.newPage();
 
