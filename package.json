@@ -2,6 +2,7 @@
   "dependencies": {
     "argv": "0.0.2",
     "fs-extra": "^6.0.1",
+    "http": "0.0.0",
     "puppeteer": "^1.4.0"
   }
 }
