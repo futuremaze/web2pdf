@@ -21,7 +21,7 @@ function do_web2pdf(url, options={}, callback=undefined) {
 
     try {
       await page.emulate(devices[emulate_device]);
-      await page.goto(url, {waitUntil: "domcontentloaded"});
+      await page.goto(url, {waitUntil: "domcontentloaded", timeout: 60000});
     } catch (e) {
       console.error(`${prog}:${e}`);
       callback_on_complete(1);
@@ -83,6 +83,7 @@ function launch_server(options={}) {
               res.write('OK\n\n');
             } else {
               res.writeHead(500);
+              res.write('NG\n\n');
             }
             res.end();
           });
