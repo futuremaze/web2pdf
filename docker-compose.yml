@@ -1,0 +1,10 @@
+version: '2'
+services:
+    web2pdf:
+        build: .
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./pdf:/home/web2pdf/pdf
+        shm_size: 512
+
