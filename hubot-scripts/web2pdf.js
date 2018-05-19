@@ -14,7 +14,7 @@ module.exports = function (robot) {
       headers: headers,
       json: {
         'url': `${url}`,
-        'outputdir': `${msg.message.user.name`
+        'outputdir': `${msg.message.user.name}`
       }
     };
     return req(options, function(err, res, body) {

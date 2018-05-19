@@ -29,13 +29,15 @@ function do_web2pdf(url, options={}, callback=undefined) {
     }  
 
     // convert to pdf.
-    var filename = (await page.title() + '.pdf').replace('/','／');
-    var width = await devices[emulate_device].viewport.width;
-    var height = await devices[emulate_device].viewport.height;
-    var deviceScaleFactor = await devices[emulate_device].viewport.deviceScaleFactor;
-
     try {
-      fs.mkdirsSync(`${base_dir}/${output_dir});
+      var title = await page.title();
+      if(title === undefined || title == "") title = (+new Date());
+      var filename = (await title + '.pdf').replace('/','_');
+      var width = await devices[emulate_device].viewport.width;
+      var height = await devices[emulate_device].viewport.height;
+      var deviceScaleFactor = await devices[emulate_device].viewport.deviceScaleFactor;
+
+      fs.mkdirsSync(`${base_dir}/${output_dir}`);
     } catch (e) {
       console.error(`${prog}:${e}`);
       callback_on_complete(1);
