@@ -1,5 +1,17 @@
 version: '2'
 services:
+    hubot-slack:
+        image: hubot-slack
+        environment:
+            - HUBOT_SLACK_TOKEN=HUBOT_SLACK_TOKEN
+            - HUBOT_NAME=myhubot
+            - HUBOT_OWNER=none
+            - HUBOT_DESCRIPTION=hubot
+        volumes:
+            - ./hubot-scripts:/home/hubot/scripts
+        links:
+            - web2pdf
+
     web2pdf:
         build: .
         ports:
