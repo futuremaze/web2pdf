@@ -13,7 +13,8 @@ module.exports = function (robot) {
       method: 'POST',
       headers: headers,
       json: {
-        'url': `${url}`
+        'url': `${url}`,
+        'outputdir': `${msg.message.user.name`
       }
     };
     return req(options, function(err, res, body) {

@@ -55,4 +55,4 @@ RUN npm install puppeteer argv http fs-extra
 VOLUME ["/home/web2pdf/pdf"]
 EXPOSE 8080
 
-ENTRYPOINT ["node", "web2pdf.js", "-o", "./pdf", "-s", "-p", "8080"]
+ENTRYPOINT ["node", "web2pdf.js", "-b", "./pdf", "-o", "./", "-s", "-p", "8080"]

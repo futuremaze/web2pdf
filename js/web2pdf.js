@@ -3,6 +3,7 @@ var prog = process.argv[1].replace(/^.*[\\\/]/, '');
 function do_web2pdf(url, options={}, callback=undefined) {
   if (url === undefined) return(1);
   var emulate_device = options.device || "iPhone 6";
+  var base_dir = options.basedir || "./";
   var output_dir = options.outputdir || "./";
   var callback_on_complete = callback || function(result_code){};
 
@@ -34,14 +35,14 @@ function do_web2pdf(url, options={}, callback=undefined) {
     var deviceScaleFactor = await devices[emulate_device].viewport.deviceScaleFactor;
 
     try {
-      fs.mkdirsSync(output_dir);
+      fs.mkdirsSync(`${base_dir}/${output_dir});
     } catch (e) {
       console.error(`${prog}:${e}`);
       callback_on_complete(1);
     }
 
     await page.pdf({
-      path: `${output_dir}/${filename}`,
+      path: `${base_dir}/${output_dir}/${filename}`,
       printBackground: true,
       width: width * deviceScaleFactor,
       height: height * deviceScaleFactor
@@ -75,6 +76,7 @@ function launch_server(options={}) {
           }
           
           var url = json.url;
+          options.outputdir = json.outputdir;
           options.device = json.device;
           options.port = port;
           do_web2pdf(url, options, function(result_code) {
@@ -101,6 +103,7 @@ function launch_server(options={}) {
 }
 
 function check_args(args) {
+  args.options.basedir = args.options.basedir || "./";
   args.options.outputdir = args.options.outputdir || "./";
   args.options.device = args.options.device || "iPhone 6";
   args.options.server = args.options.server || false;
@@ -120,11 +123,18 @@ function do_main() {
   argv.version('v1.0');
   argv.info(`${prog} [options] url`);
   argv.option({
+      name: 'basedir',
+      short: 'b',
+      type: 'path',
+      description: 'The destination directory to save your pdf.',
+      example: `'${prog} -b /path/to url' or '${prog} --basedir /path/to url'`
+  });
+  argv.option({
       name: 'outputdir',
       short: 'o',
       type: 'path',
-      description: 'The destination directory to save your pdf.',
-      example: `'${prog} -o /path/to url' or '${prog} --outputdir /path/to url'`
+      description: 'The relative path from base directory to save your pdf.',
+      example: `'${prog} -o ./path/to url' or '${prog} --outputdir ./path/to url'`
   });
   argv.option({
       name: 'device',

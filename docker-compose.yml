@@ -2,6 +2,7 @@ version: '2'
 services:
     hubot-slack:
         image: hubot-slack
+        container_name: hubot-slack
         environment:
             - HUBOT_SLACK_TOKEN=HUBOT_SLACK_TOKEN
             - HUBOT_NAME=myhubot
@@ -14,6 +15,8 @@ services:
 
     web2pdf:
         build: .
+        image: web2pdf
+        container_name: web2pdf
         ports:
             - "8080:8080"
         volumes:
