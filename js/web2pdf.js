@@ -1,5 +1,32 @@
 var prog = process.argv[1].replace(/^.*[\\\/]/, '');
 
+async function scrollToBottom(page, viewportHeight) {
+  const getScrollHeight = () => {
+    return Promise.resolve(document.documentElement.scrollHeight) }
+
+  let scrollHeight = await page.evaluate(getScrollHeight)
+  let currentPosition = 0
+  let scrollNumber = 0
+
+  while (currentPosition < scrollHeight) {
+    scrollNumber += 1
+    const nextPosition = scrollNumber * viewportHeight
+    await page.evaluate(function (scrollTo) {
+      return Promise.resolve(window.scrollTo(0, scrollTo))
+    }, nextPosition)
+    await page.waitForNavigation({waitUntil: 'networkidle2', timeout: 5000})
+              .catch(e => console.log('timeout exceed. proceed to next operation'));
+
+    currentPosition = nextPosition;
+    console.log(`scrollNumber: ${scrollNumber}`)
+    console.log(`currentPosition: ${currentPosition}`)
+
+    // 2
+    scrollHeight = await page.evaluate(getScrollHeight)
+    console.log(`ScrollHeight ${scrollHeight}`)
+  }
+}
+
 function do_web2pdf(url, options={}, callback=undefined) {
   if (url === undefined) return(1);
   var emulate_device = options.device || "iPhone 6";
@@ -22,7 +49,9 @@ function do_web2pdf(url, options={}, callback=undefined) {
 
     try {
       await page.emulate(devices[emulate_device]);
-      await page.goto(url, {waitUntil: "domcontentloaded", timeout: 60000});
+      await page.goto(url);
+      await page.waitForNavigation({waitUntil: "networkidle2", timeout: 60000});
+      await scrollToBottom(page, devices[emulate_device].viewport.height);
     } catch (e) {
       console.error(`${prog}:${e}`);
       callback_on_complete(1);
